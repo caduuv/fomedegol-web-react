@@ -1,22 +1,15 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth';
+import FormInicial from '../../components/Inicial/FormInicial';
+import Background from '../../components/Inicial/Background';
+
 
 const SignIn = () => {
-    const { signIn } = useAuth();
-    const navigate = useNavigate();
-
-    const handleSignIn = async (e: any) => {
-        e.preventDefault()
-        await signIn("ceduardovidalf@gmail.com", "123456");
-        navigate('/home');
-    }
-
+    
     return (
-        <div>
-        <h1>SignIn</h1>
-        <button onClick={handleSignIn}>Sign In</button>
-        </div>
+        <>
+        <Background />
+        <FormInicial />
+        </>
     );
 }
 
