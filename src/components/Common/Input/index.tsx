@@ -10,6 +10,7 @@ const Input = (props: any) => {
                 onChange={props.onChange}
                 type={props.type}
                 placeholder={props.placeholder}
+                onKeyPress={props.onKeyPress}
                 autoComplete="nope"
             />
         );
@@ -20,6 +21,7 @@ const Input = (props: any) => {
                 ref={props.forwardedRef}
                 onChange={props.onChange}
                 type={props.type}
+                onKeyPress={props.onKeyPress}
                 placeholder={props.placeholder}
                 autoComplete="nope"
             />

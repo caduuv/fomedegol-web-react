@@ -1,11 +1,13 @@
 import React from 'react';
 import * as C from './styles';
 
-function Wrapper({children}:any) {
+function Wrapper({ children }: any) {
     return (
-        <C.Wrapper>
-            {children}
-        </C.Wrapper>
+        <C.OutsideWrapper>
+            <C.Wrapper>
+                {children}
+            </C.Wrapper>
+        </C.OutsideWrapper>
     );
 }
 

@@ -4,6 +4,7 @@ export const Input = styled.input`
     padding: 15px;
     font-size: 16px;
     border: 1px solid #272727;
+    font-family: 'Quicksand', normal;
     border-radius: 15px;
     box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.1);
     margin-top: 15px;

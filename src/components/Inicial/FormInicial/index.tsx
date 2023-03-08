@@ -16,9 +16,12 @@ interface ErrorFlagType {
     message: string;
 }
 
+const TEMPO_MINIMO_ENTRE_EMAILS = 60 * 1000;
+
 function FormInicial() {
 
-    const { loading } = useAuth();
+    const [lastEmailSent, setLastEmailSent] = React.useState<Date | undefined>(undefined);
+    const { loading, sendPasswordReset } = useAuth();
     const [emailRef, setEmailsFocus] = useFocus()
     const [pwRef, setPWFocus] = useFocus()
 
@@ -40,7 +43,6 @@ function FormInicial() {
 
     React.useEffect(() => {
         if (error) {
-            console.log(error.code)
             const err = getFirebaseResponseMessage(error.code as keyof typeof getFirebaseResponseMessage);
             if (error.code === "auth/user-not-found") {
                 goFocus("email");
@@ -54,11 +56,11 @@ function FormInicial() {
                     type: 'password',
                     message: err || 'Senha inválida'
                 })
-            }else{
+            } else {
                 toast.error(err || 'Erro desconhecido');
                 setErrorFlag({
                     type: undefined,
-                    message: err + " Tente novamente mais tarde." 
+                    message: err + " Tente novamente mais tarde."
                 })
             }
         }
@@ -77,9 +79,47 @@ function FormInicial() {
         navigate('/');
     }
 
-    const handleConfirmation = (e: any) => {
-        e.preventDefault();
+    const handleKeyPress = (event: any) => {
+        if (event.key === 'Enter') {
+            handleConfirmation();
+        }
+      }
 
+    const handleResetPassword = async () => {
+
+        let timeSinceLastEmail;
+
+        if (!email) {
+            goFocus("email");
+            setErrorFlag({
+                type: 'email',
+                message: "Insira um email válido para recuperar a senha"
+            })
+            return;
+        }
+
+        if (lastEmailSent !== undefined) {
+            timeSinceLastEmail = (new Date().getTime() - lastEmailSent.getTime());
+        }
+
+        if (!lastEmailSent || (timeSinceLastEmail && timeSinceLastEmail > TEMPO_MINIMO_ENTRE_EMAILS)) {
+
+            await sendPasswordReset(email);
+            setLastEmailSent(new Date());
+            toast.success('Email de redefinição de senha enviado');
+            return;
+
+
+        }
+
+        toast.error(`Espere ${timeSinceLastEmail ? ((TEMPO_MINIMO_ENTRE_EMAILS - timeSinceLastEmail) / 1000).toFixed() : "alguns"} segundos para enviar outro email de redefinição de senha`);
+
+    }
+
+    const handleConfirmation = (e?: any) => {
+        if(e){
+            e.preventDefault();
+        }
         validarLogin({ email: { value: email, focuser: setEmailsFocus }, senha: { value: password, focuser: setPWFocus } })
             .then(() => onSubmit(email, password))
             .catch(setErrorFlag)
@@ -94,10 +134,10 @@ function FormInicial() {
             <C.Subtitle>Aproveite cada lance. Aproveite cada lanche.</C.Subtitle>
             {errorFlag && <C.ErrorMessage>{errorFlag.message}</C.ErrorMessage>}
             <C.InputWrapper autoComplete="nope">
-                <Input autoComplete="nope" forwardedRef={emailRef} type="text" placeholder='Usuário ou Email' value={email} onChange={handleEmailChange} error={errorFlag && errorFlag.type === "email"} />
-                <Input forwardedRef={pwRef} type="password" placeholder='Senha' value={password} onChange={handlePasswordChange} error={errorFlag && errorFlag.type === "password"} />
+                <Input autoComplete="nope" forwardedRef={emailRef} type="text" placeholder='Usuário ou Email' onKeyPress={handleKeyPress} value={email} onChange={handleEmailChange} error={errorFlag && errorFlag.type === "email"} />
+                <Input forwardedRef={pwRef} type="password" placeholder='Senha' value={password} onKeyPress={handleKeyPress} onChange={handlePasswordChange} error={errorFlag && errorFlag.type === "password"} />
             </C.InputWrapper>
-            <C.ForgotPassword>Esqueceu a senha?</C.ForgotPassword>
+            <C.ForgotPassword onClick={handleResetPassword}>Esqueceu a senha?</C.ForgotPassword>
             <C.CenterWrapper>
                 <ConfirmationButton text={'Entrar'} onClick={handleConfirmation} />
                 <C.CreateAccount>Crie uma Conta</C.CreateAccount>
